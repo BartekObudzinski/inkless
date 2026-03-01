@@ -18,8 +18,8 @@ import { logger } from './utils/logger.js';
 const program = new Command();
 
 program
-  .name('canon-print')
-  .description('Canon G3410 Driverless Printing CLI')
+  .name('inkless')
+  .description('Driverless printing CLI for Canon printers')
   .version('1.0.0');
 
 // Discover command
@@ -127,13 +127,13 @@ program
       console.log(chalk.cyan('Recommended Protocol:'));
       if (hasIPP(results)) {
         console.log(chalk.green('  → IPP (Port 631) - Best option'));
-        console.log(`    Run: canon-print test-ipp ${ip}`);
+        console.log(`    Run: inkless test-ipp ${ip}`);
       } else if (hasRawSocket(results)) {
         console.log(chalk.yellow('  → Raw Socket (Port 9100)'));
-        console.log(`    Run: canon-print print <file> -h ${ip} -p raw`);
+        console.log(`    Run: inkless print <file> -h ${ip} -p raw`);
       } else if (hasBJNP(results)) {
         console.log(chalk.yellow('  → BJNP (Port 8611) - Requires Docker'));
-        console.log(`    Run: canon-print setup-bjnp ${ip}`);
+        console.log(`    Run: inkless setup-bjnp ${ip}`);
       }
     } catch (err) {
       spinner.fail('Scan failed');
@@ -183,7 +183,7 @@ program
       }
 
       console.log('\n' + chalk.green('Ready to print!'));
-      console.log(`  Run: canon-print print <file> -h ${ip}`);
+      console.log(`  Run: inkless print <file> -h ${ip}`);
     } catch (err) {
       spinner.fail('IPP test failed');
       logger.error(String(err));
@@ -340,7 +340,7 @@ program
       if (success) {
         spinner.succeed('BJNP environment ready');
         console.log('\n' + chalk.green('Setup complete!'));
-        console.log(`  Print command: canon-print print <file> -h ${ip} -p bjnp`);
+        console.log(`  Print command: inkless print <file> -h ${ip} -p bjnp`);
       } else {
         spinner.fail('Setup failed');
       }

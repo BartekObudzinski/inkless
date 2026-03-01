@@ -1,6 +1,6 @@
-# Canon Print CLI
+# Inkless
 
-A driverless printing solution for Canon printers (tested with G3410). Print documents without installing proprietary drivers using standard protocols.
+Driverless printing CLI for Canon printers (tested with G3410). Print documents without installing proprietary drivers using standard protocols.
 
 ## Features
 
@@ -30,53 +30,53 @@ npm run build
 
 ```bash
 # Find all printers on the network
-npx ts-node src/index.ts discover
+inkless discover
 
 # Include BJNP device scan
-npx ts-node src/index.ts discover --bjnp
+inkless discover --bjnp
 ```
 
 ### Scan Printer Protocols
 
 ```bash
 # Check which protocols a printer supports
-npx ts-node src/index.ts scan 192.168.1.100
+inkless scan 192.168.1.100
 ```
 
 ### Test IPP Connection
 
 ```bash
 # Verify IPP connectivity and get printer capabilities
-npx ts-node src/index.ts test-ipp 192.168.1.100
+inkless test-ipp 192.168.1.100
 ```
 
 ### Print a File
 
 ```bash
 # Print via IPP (default)
-npx ts-node src/index.ts print document.pdf -h 192.168.1.100
+inkless print document.pdf -h 192.168.1.100
 
 # Print via Raw Socket
-npx ts-node src/index.ts print document.pdf -h 192.168.1.100 -p raw
+inkless print document.pdf -h 192.168.1.100 -p raw
 
 # Print via BJNP (requires Docker setup)
-npx ts-node src/index.ts print document.pdf -h 192.168.1.100 -p bjnp
+inkless print document.pdf -h 192.168.1.100 -p bjnp
 
 # With file conversion
-npx ts-node src/index.ts print document.docx -h 192.168.1.100 --convert
+inkless print document.docx -h 192.168.1.100 --convert
 ```
 
 ### Setup BJNP (Docker)
 
 ```bash
 # Build Docker image and configure BJNP printing
-npx ts-node src/index.ts setup-bjnp 192.168.1.100
+inkless setup-bjnp 192.168.1.100
 ```
 
 ### Check System Status
 
 ```bash
-npx ts-node src/index.ts status
+inkless status
 ```
 
 ## Project Structure
@@ -117,7 +117,7 @@ npx ts-node src/index.ts status
 **No printers found:**
 - Ensure the printer is powered on and connected to WiFi
 - Check that your computer is on the same network
-- Try scanning a specific IP: `npx ts-node src/index.ts scan <ip>`
+- Try scanning a specific IP: `inkless scan <ip>`
 
 **IPP connection failed:**
 - Some Canon printers require IPP to be enabled in settings
@@ -125,7 +125,7 @@ npx ts-node src/index.ts status
 
 **BJNP not working:**
 - Ensure Docker is installed and running
-- Run `setup-bjnp` command first
+- Run `inkless setup-bjnp` command first
 
 ## License
 

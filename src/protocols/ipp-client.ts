@@ -144,7 +144,7 @@ export class IPPClient {
           'attributes-charset': 'utf-8',
           'attributes-natural-language': 'en',
           'printer-uri': this.printerUri,
-          'requesting-user-name': options.userName || 'canon-print',
+          'requesting-user-name': options.userName || 'inkless',
           'job-name': options.jobName || 'Print Job',
           'document-format': options.documentFormat || 'application/octet-stream',
         },

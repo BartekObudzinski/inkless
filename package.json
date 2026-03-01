@@ -1,10 +1,10 @@
 {
-  "name": "canon-print",
+  "name": "inkless",
   "version": "1.0.0",
-  "description": "Canon G3410 Driverless Printing Solution",
+  "description": "Driverless printing CLI for Canon printers",
   "main": "dist/index.js",
   "bin": {
-    "canon-print": "./dist/index.js"
+    "inkless": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",

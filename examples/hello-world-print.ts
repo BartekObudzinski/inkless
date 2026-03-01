@@ -45,14 +45,14 @@ async function main() {
   const testContent = `
 Hello World!
 
-This is a test print from Canon Print CLI.
+This is a test print from Inkless CLI.
 Printer IP: ${printerIP}
 Timestamp: ${new Date().toISOString()}
 
 If you can read this, the driverless printing is working!
 `;
 
-  const testFile = path.join(os.tmpdir(), 'canon-print-test.txt');
+  const testFile = path.join(os.tmpdir(), 'inkless-test.txt');
   fs.writeFileSync(testFile, testContent);
   logger.success(`Test file created: ${testFile}`);
 
@@ -90,7 +90,7 @@ If you can read this, the driverless printing is working!
       logger.error(`Send failed: ${printResult.error}`);
     }
   } else {
-    logger.warn('Only BJNP available. Run: canon-print setup-bjnp ' + printerIP);
+    logger.warn('Only BJNP available. Run: inkless setup-bjnp ' + printerIP);
   }
 
   // Cleanup

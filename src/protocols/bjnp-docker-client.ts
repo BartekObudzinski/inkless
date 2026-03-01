@@ -119,7 +119,7 @@ CMD ["/usr/sbin/cupsd", "-f"]
       execSync(
         `docker run -d --name ${CONTAINER_NAME} ` +
           `--network host ` +
-          `-v /tmp/canon-print:/tmp/canon-print ` +
+          `-v /tmp/inkless:/tmp/inkless ` +
           `${DOCKER_IMAGE}`,
         { stdio: 'pipe' }
       );
@@ -173,11 +173,11 @@ CMD ["/usr/sbin/cupsd", "-f"]
 
     // Copy file to shared volume
     const fileName = path.basename(filePath);
-    const sharedPath = `/tmp/canon-print/${fileName}`;
-    const containerPath = `/tmp/canon-print/${fileName}`;
+    const sharedPath = `/tmp/inkless/${fileName}`;
+    const containerPath = `/tmp/inkless/${fileName}`;
 
     try {
-      fs.mkdirSync('/tmp/canon-print', { recursive: true });
+      fs.mkdirSync('/tmp/inkless', { recursive: true });
       fs.copyFileSync(filePath, sharedPath);
     } catch (err) {
       return { success: false, error: `Failed to copy file: ${err}` };
