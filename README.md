@@ -74,7 +74,7 @@ inkless status
 Desktop application built with [Tauri](https://tauri.app/). Located in `gui/` directory.
 
 ```bash
-cd gui/inkless-gui
+cd gui/inkless-status
 npm install
 npm run tauri dev
 ```
