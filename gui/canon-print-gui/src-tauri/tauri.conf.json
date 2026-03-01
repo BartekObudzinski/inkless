@@ -35,7 +35,7 @@
       "icons/icon.ico"
     ],
     "category": "Utility",
-    "shortDescription": "Driverless printing for Canon printers",
-    "longDescription": "A lightweight macOS app for printing to Canon printers without drivers. Supports IPP/AirPrint protocol."
+    "shortDescription": "Driverless printing for network printers",
+    "longDescription": "A lightweight macOS app for driverless printing to any IPP/AirPrint compatible network printer."
   }
 }

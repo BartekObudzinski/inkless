@@ -1,7 +1,7 @@
 {
   "name": "inkless",
   "version": "1.0.0",
-  "description": "Driverless printing CLI for Canon printers",
+  "description": "Driverless printing CLI for network printers",
   "main": "dist/index.js",
   "bin": {
     "inkless": "./dist/index.js"
