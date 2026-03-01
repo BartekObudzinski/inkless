@@ -1,0 +1,31 @@
+{
+  "name": "canon-print",
+  "version": "1.0.0",
+  "description": "Canon G3410 Driverless Printing Solution",
+  "main": "dist/index.js",
+  "bin": {
+    "canon-print": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "dev": "ts-node src/index.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "ipp": "^2.0.1",
+    "bonjour-service": "^1.2.1",
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/ipp": "^2.0.5",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
