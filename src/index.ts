@@ -5,12 +5,10 @@ import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
 
-import { scanPorts, getOpenPorts, hasIPP, hasRawSocket, hasBJNP } from './discovery/port-scanner.js';
-import { discoverPrinters, filterCanonPrinters } from './discovery/mdns-discovery.js';
-import { discoverBJNP, probeBJNP } from './discovery/bjnp-discovery.js';
+import { scanPorts, getOpenPorts, hasIPP, hasRawSocket } from './discovery/port-scanner.js';
+import { discoverPrinters } from './discovery/mdns-discovery.js';
 import { IPPClient, testIPPConnection } from './protocols/ipp-client.js';
 import { RawSocketClient, testRawSocket } from './protocols/raw-socket-client.js';
-import { BJNPDockerClient, setupBJNPDocker } from './protocols/bjnp-docker-client.js';
 import { getFileInfo, detectMimeType, needsConversion } from './conversion/mime-detector.js';
 import { GhostscriptConverter, checkGhostscript } from './conversion/ghostscript.js';
 import { logger } from './utils/logger.js';
@@ -19,7 +17,7 @@ const program = new Command();
 
 program
   .name('inkless')
-  .description('Driverless printing CLI for Canon printers')
+  .description('Driverless printing CLI for network printers')
   .version('1.0.0');
 
 // Discover command
@@ -27,25 +25,12 @@ program
   .command('discover')
   .description('Discover all printers on the network')
   .option('-t, --timeout <ms>', 'Discovery timeout in milliseconds', '5000')
-  .option('--bjnp', 'Also scan for BJNP devices')
   .action(async (options) => {
     const spinner = ora('Discovering printers...').start();
 
     try {
       const timeout = parseInt(options.timeout);
       const printers = await discoverPrinters(timeout);
-
-      if (options.bjnp) {
-        spinner.text = 'Scanning for BJNP devices...';
-        const bjnpDevices = await discoverBJNP(3000);
-
-        if (bjnpDevices.length > 0) {
-          console.log('\n' + chalk.cyan('BJNP Devices:'));
-          for (const device of bjnpDevices) {
-            console.log(`  ${device.ip}:${device.port}${device.model ? ` (${device.model})` : ''}`);
-          }
-        }
-      }
 
       spinner.stop();
 
@@ -58,11 +43,7 @@ program
       console.log('─'.repeat(60));
 
       for (const printer of printers) {
-        const isCanon = printer.name.toLowerCase().includes('canon') ||
-          printer.txt['mfg']?.toLowerCase().includes('canon');
-
-        const icon = isCanon ? chalk.green('◉') : chalk.gray('○');
-        console.log(`${icon} ${chalk.bold(printer.name)}`);
+        console.log(`${chalk.green('◉')} ${chalk.bold(printer.name)}`);
         console.log(`  Host: ${printer.host}:${printer.port}`);
         console.log(`  Type: ${printer.type}`);
 
@@ -77,10 +58,7 @@ program
         console.log();
       }
 
-      const canonPrinters = filterCanonPrinters(printers);
-      if (canonPrinters.length > 0) {
-        console.log(chalk.green(`Found ${canonPrinters.length} Canon printer(s)`));
-      }
+      console.log(chalk.green(`Found ${printers.length} printer(s)`));
     } catch (err) {
       spinner.fail('Discovery failed');
       logger.error(String(err));
@@ -131,9 +109,6 @@ program
       } else if (hasRawSocket(results)) {
         console.log(chalk.yellow('  → Raw Socket (Port 9100)'));
         console.log(`    Run: inkless print <file> -h ${ip} -p raw`);
-      } else if (hasBJNP(results)) {
-        console.log(chalk.yellow('  → BJNP (Port 8611) - Requires Docker'));
-        console.log(`    Run: inkless setup-bjnp ${ip}`);
       }
     } catch (err) {
       spinner.fail('Scan failed');
@@ -193,10 +168,10 @@ program
 // Print command
 program
   .command('print')
-  .description('Print a file to the Canon printer')
+  .description('Print a file')
   .argument('<file>', 'File to print')
   .requiredOption('-h, --host <ip>', 'Printer IP address')
-  .option('-p, --protocol <protocol>', 'Protocol: ipp, raw, bjnp', 'ipp')
+  .option('-p, --protocol <protocol>', 'Protocol: ipp, raw', 'ipp')
   .option('--port <port>', 'Port number')
   .option('-c, --copies <n>', 'Number of copies', '1')
   .option('-n, --job-name <name>', 'Job name')
@@ -289,63 +264,11 @@ program
           spinner.fail(`Send failed: ${result.error}`);
         }
 
-      } else if (protocol === 'bjnp') {
-        spinner.text = 'Printing via BJNP Docker...';
-
-        const client = new BJNPDockerClient(options.host);
-        if (!client.isDockerAvailable()) {
-          spinner.fail('Docker required for BJNP printing');
-          return;
-        }
-
-        const result = await client.print(file);
-
-        if (result.success) {
-          spinner.succeed(`Print job submitted${result.jobId ? `: ${result.jobId}` : ''}`);
-        } else {
-          spinner.fail(`Print failed: ${result.error}`);
-        }
-
       } else {
-        spinner.fail(`Unknown protocol: ${protocol}`);
+        spinner.fail(`Unknown protocol: ${protocol}. Use 'ipp' or 'raw'.`);
       }
     } catch (err) {
       spinner.fail('Print failed');
-      logger.error(String(err));
-    }
-  });
-
-// Setup BJNP Docker command
-program
-  .command('setup-bjnp')
-  .description('Setup BJNP printing via Docker')
-  .argument('<ip>', 'Printer IP address')
-  .action(async (ip) => {
-    const spinner = ora('Setting up BJNP Docker environment...').start();
-
-    try {
-      // First check if BJNP is available
-      spinner.text = 'Checking BJNP availability...';
-      const hasBjnp = await probeBJNP(ip);
-
-      if (!hasBjnp) {
-        spinner.warn('BJNP not detected on this printer');
-        console.log(chalk.yellow('The printer may not support BJNP or is not responding.'));
-        console.log('Continuing with setup anyway...\n');
-      }
-
-      spinner.text = 'Building Docker image...';
-      const success = await setupBJNPDocker(ip);
-
-      if (success) {
-        spinner.succeed('BJNP environment ready');
-        console.log('\n' + chalk.green('Setup complete!'));
-        console.log(`  Print command: inkless print <file> -h ${ip} -p bjnp`);
-      } else {
-        spinner.fail('Setup failed');
-      }
-    } catch (err) {
-      spinner.fail('Setup failed');
       logger.error(String(err));
     }
   });
@@ -355,7 +278,7 @@ program
   .command('status')
   .description('Check system requirements and dependencies')
   .action(() => {
-    console.log(chalk.cyan('Canon Print CLI Status'));
+    console.log(chalk.cyan('Inkless CLI Status'));
     console.log('─'.repeat(40));
 
     // Node.js version
@@ -368,18 +291,6 @@ program
     } else {
       console.log(chalk.yellow('  Ghostscript: Not installed'));
       console.log(chalk.gray('    Install: brew install ghostscript'));
-    }
-
-    // Docker
-    try {
-      const client = new BJNPDockerClient('127.0.0.1');
-      if (client.isDockerAvailable()) {
-        console.log(chalk.green('  Docker: Available'));
-      } else {
-        console.log(chalk.yellow('  Docker: Not available'));
-      }
-    } catch {
-      console.log(chalk.yellow('  Docker: Not available'));
     }
 
     console.log();

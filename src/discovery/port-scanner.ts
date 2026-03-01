@@ -92,7 +92,3 @@ export function hasIPP(results: PortScanResult[]): boolean {
 export function hasRawSocket(results: PortScanResult[]): boolean {
   return results.some((r) => r.port === 9100 && r.open);
 }
-
-export function hasBJNP(results: PortScanResult[]): boolean {
-  return results.some((r) => r.port === 8611 && r.open);
-}

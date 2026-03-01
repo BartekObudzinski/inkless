@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { scanPorts, hasIPP, hasRawSocket, hasBJNP } from '../src/discovery/port-scanner.js';
+import { scanPorts, hasIPP, hasRawSocket } from '../src/discovery/port-scanner.js';
 import { IPPClient, testIPPConnection } from '../src/protocols/ipp-client.js';
 import { RawSocketClient } from '../src/protocols/raw-socket-client.js';
 import { logger } from '../src/utils/logger.js';
@@ -21,7 +21,7 @@ async function main() {
     process.exit(1);
   }
 
-  logger.info(`Testing Canon printer at ${printerIP}`);
+  logger.info(`Testing printer at ${printerIP}`);
 
   // Step 1: Scan for available protocols
   logger.info('Step 1: Scanning for available protocols...');
@@ -29,13 +29,11 @@ async function main() {
 
   const ippAvailable = hasIPP(scanResults);
   const rawAvailable = hasRawSocket(scanResults);
-  const bjnpAvailable = hasBJNP(scanResults);
 
   logger.info(`IPP (631): ${ippAvailable ? 'Available' : 'Not available'}`);
   logger.info(`Raw (9100): ${rawAvailable ? 'Available' : 'Not available'}`);
-  logger.info(`BJNP (8611): ${bjnpAvailable ? 'Available' : 'Not available'}`);
 
-  if (!ippAvailable && !rawAvailable && !bjnpAvailable) {
+  if (!ippAvailable && !rawAvailable) {
     logger.error('No supported protocols found. Check printer connection.');
     process.exit(1);
   }
@@ -89,8 +87,6 @@ If you can read this, the driverless printing is working!
     } else {
       logger.error(`Send failed: ${printResult.error}`);
     }
-  } else {
-    logger.warn('Only BJNP available. Run: inkless setup-bjnp ' + printerIP);
   }
 
   // Cleanup
