@@ -12,17 +12,21 @@ export function Titlebar({ isDark, onToggleTheme }: Props) {
   const handleMaximize = () => appWindow.toggleMaximize();
   const handleClose = () => appWindow.close();
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Only start drag if clicking directly on the titlebar, not on buttons
+    if (e.target === e.currentTarget) {
+      e.preventDefault();
+      appWindow.startDragging();
+    }
+  };
+
   return (
     <div
-      data-tauri-drag-region
-      className="h-9 flex items-center justify-between px-3 bg-surface-2 dark:bg-dark-2 border-b border-surface-border dark:border-dark-border select-none"
-      style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
+      onMouseDown={handleMouseDown}
+      className="h-9 flex items-center justify-between px-3 bg-surface-2 dark:bg-dark-2 border-b border-surface-border dark:border-dark-border select-none cursor-default"
     >
       {/* Window controls (macOS style - left side) */}
-      <div
-        className="flex items-center gap-2"
-        style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
-      >
+      <div className="flex items-center gap-2">
         <button
           onClick={handleClose}
           className="w-3 h-3 rounded-full bg-[#ff5f57] hover:brightness-90 border-none p-0 cursor-pointer transition-all"
@@ -40,8 +44,14 @@ export function Titlebar({ isDark, onToggleTheme }: Props) {
         />
       </div>
 
-      {/* Title */}
-      <span className="text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
+      {/* Title - also draggable */}
+      <span
+        onMouseDown={(e) => {
+          e.preventDefault();
+          appWindow.startDragging();
+        }}
+        className="text-sm font-medium text-text-secondary dark:text-text-dark-secondary cursor-default"
+      >
         Inkless
       </span>
 
@@ -49,7 +59,6 @@ export function Titlebar({ isDark, onToggleTheme }: Props) {
       <button
         onClick={onToggleTheme}
         className="w-6 h-6 flex items-center justify-center rounded-md bg-transparent hover:bg-surface-3 dark:hover:bg-dark-3 border-none p-0 cursor-pointer transition-all text-text-secondary"
-        style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
         title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       >
         {isDark ? (
